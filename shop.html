@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh Phương - Thực phẩm sạch</title>
+    <style>
+        :root { --primary: #27ae60; --dark: #333; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: all 0.3s ease; }
+        body { background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-attachment: fixed; margin: 0; padding-bottom: 50px; }
+        header { background: #fff; padding: 20px; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: auto; }
+        .nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .search-box { padding: 10px 15px; border: 2px solid var(--primary); border-radius: 25px; width: 100%; max-width: 300px; outline: none; }
+        .tabs { display: flex; gap: 10px; margin: 20px auto; justify-content: center; flex-wrap: wrap; }
+        .tab { padding: 8px 20px; border: none; border-radius: 20px; cursor: pointer; background: #e0e0e0; font-weight: bold; }
+        .tab.active { background: var(--primary); color: white; transform: scale(1.1); }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; max-width: 1000px; margin: auto; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(5, 1fr); } }
+        .card { background: white; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; animation: fadeIn 0.5s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .btn-order { margin-top: auto; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 200; }
+        .modal { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 350px; transform: scale(0.8); }
+        #overlay.active .modal { transform: scale(1); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container nav">
+        <div class="logo">MINH PHƯƠNG</div>
+        <input type="text" class="search-box" id="search" placeholder="Tìm kiếm sản phẩm..." onkeyup="search()">
+    </div>
+</header>
+
+<div class="tabs">
+    <button class="tab active" onclick="filter('all', this)">Tất cả</button>
+    <button class="tab" onclick="filter('rau', this)">Rau Củ</button>
+    <button class="tab" onclick="filter('thit', this)">Thịt & Cá</button>
+    <button class="tab" onclick="filter('hoaqua', this)">Hoa Quả</button>
+</div>
+
+<div class="grid" id="grid">
+    <script>
+        const prods = [
+            {n:"Ba rọi", c:"thit", o:"Nguyễn Văn A"}, {n:"Sườn non", c:"thit", o:"Trần Văn B"}, {n:"Cá chép", c:"thit", o:"Lê Văn C"}, {n:"Cá hồi", c:"thit", o:"Phạm Văn D"}, {n:"Mực tươi", c:"thit", o:"Hoàng Văn E"}, {n:"Tôm sú", c:"thit", o:"Đặng Văn F"}, {n:"Thịt bò", c:"thit", o:"Vũ Văn G"}, {n:"Gà ta", c:"thit", o:"Bùi Văn H"}, {n:"Cá thu", c:"thit", o:"Đỗ Văn I"}, {n:"Chân giò", c:"thit", o:"Hồ Văn K"},
+            {n:"Bắp cải", c:"rau", o:"Ngô Văn L"}, {n:"Bông cải", c:"rau", o:"Dương Văn M"}, {n:"Cà rốt", c:"rau", o:"Lý Văn N"}, {n:"Cà chua", c:"rau", o:"Đinh Văn O"}, {n:"Dưa chuột", c:"rau", o:"Phan Văn P"}, {n:"Ớt chuông", c:"rau", o:"Võ Văn Q"}, {n:"Hành tây", c:"rau", o:"Trịnh Văn R"}, {n:"Khoai tây", c:"rau", o:"Đào Văn S"}, {n:"Rau cải", c:"rau", o:"Bạch Văn T"}, {n:"Su hào", c:"rau", o:"Triệu Văn U"},
+            {n:"Táo đỏ", c:"hoaqua", o:"Nghiêm Văn V"}, {n:"Chuối", c:"hoaqua", o:"Mai Văn W"}, {n:"Cam", c:"hoaqua", o:"Lâm Văn X"}, {n:"Nho", c:"hoaqua", o:"Tống Văn Y"}, {n:"Xoài", c:"hoaqua", o:"Tạ Văn Z"}, {n:"Dưa hấu", c:"hoaqua", o:"Chu Văn A1"}, {n:"Ổi", c:"hoaqua", o:"Cao Văn B1"}, {n:"Lê", c:"hoaqua", o:"Thân Văn C1"}, {n:"Mận", c:"hoaqua", o:"Bế Văn D1"}, {n:"Đào", c:"hoaqua", o:"Cù Văn E1"}
+        ];
+        prods.forEach(item => {
+            document.write(`
+                <div class="card" data-cat="${item.c}">
+                    <div style="font-weight:bold; margin:10px 0;">${item.n}</div>
+                    <div style="color:#d35400; margin-bottom:10px;">Giá: LH</div>
+                    <button class="btn-order" onclick="show('${item.n}', '${item.o}')">Đặt hàng</button>
+                </div>
+            `);
+        });
+    </script>
+</div>
+
+<div id="overlay" onclick="hide()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h3 id="modalProd"></h3>
+        <p id="modalOwner" style="font-weight:bold; color:var(--primary); margin:10px 0;"></p>
+        <p>Địa chỉ: Số 123, Đường Láng, Hà Nội</p>
+        <div style="margin:20px 0; padding:10px; background:#e8f5e9; font-size:1.2rem; font-weight:bold;">0949813905</div>
+        <button class="btn-order" style="background:#666" onclick="hide()">Đóng</button>
+    </div>
+</div>
+
+<script>
+    function show(prod, owner) {
+        document.getElementById('modalProd').innerText = "Đơn hàng: " + prod;
+        document.getElementById('modalOwner').innerText = "Chủ hàng: " + owner;
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('active'), 10);
+    }
+    function hide() { 
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.style.display = 'none', 300);
+    }
+    function filter(cat, btn) { 
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
+        btn.classList.add('active'); 
+        document.querySelectorAll('.card').forEach(c => {
+            c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'flex' : 'none';
+        }); 
+    }
+    // Hàm tìm kiếm theo tên sản phẩm
+    function search() { 
+        let val = document.getElementById('search').value.toLowerCase(); 
+        document.querySelectorAll('.card').forEach(c => {
+            let name = c.querySelector('div').innerText.toLowerCase();
+            c.style.display = name.includes(val) ? 'flex' : 'none';
+        }); 
+    }
+</script>
+</body>
+</html>
